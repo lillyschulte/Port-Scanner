@@ -1,18 +1,7 @@
-import socket
 import tkinter as tk
 import tkinter.ttk as ttk
+import subprocess
 import threading
-
-def scan(host, port):
-  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s.settimeout(0.5)
-  try:
-    s.connect((host, port))
-    return True
-  except:
-    return False
-  finally:
-    s.close()
 
 def start_scan():
   host = host_entry.get()
@@ -25,10 +14,9 @@ def start_scan():
   scan_thread.start()
 
 def do_scan(host, start_port, end_port):
-  for port in range(start_port, end_port+1):
-    if scan(host, port):
-      result_text.insert(tk.END, "Port {} is open\n".format(port))
-    progress_bar["value"] += 1
+  result = subprocess.run(["nmap", "-p", "{}-{}".format(start_port, end_port), host], capture_output=True)
+  result_text.insert(tk.END, result.stdout.decode())
+  progress_bar["value"] = progress_bar["maximum"]
 
 # create the main window
 root = tk.Tk()
