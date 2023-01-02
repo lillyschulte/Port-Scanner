@@ -1,5 +1,6 @@
 import socket
 import tkinter as tk
+import tkinter.ttk as ttk
 import threading
 
 def scan(host, port):
@@ -18,6 +19,8 @@ def start_scan():
   start_port = int(start_port_entry.get())
   end_port = int(end_port_entry.get())
   result_text.delete("1.0", tk.END)
+  progress_bar["value"] = 0
+  progress_bar["maximum"] = end_port - start_port + 1
   scan_thread = threading.Thread(target=do_scan, args=(host, start_port, end_port))
   scan_thread.start()
 
@@ -25,6 +28,7 @@ def do_scan(host, start_port, end_port):
   for port in range(start_port, end_port+1):
     if scan(host, port):
       result_text.insert(tk.END, "Port {} is open\n".format(port))
+    progress_bar["value"] += 1
 
 # create the main window
 root = tk.Tk()
@@ -52,8 +56,10 @@ end_port_entry.pack(side="left")
 button_frame = tk.Frame(root)
 scan_button = tk.Button(button_frame, text="Scan", command=start_scan)
 result_text = tk.Text(button_frame)
+progress_bar = ttk.Progressbar(button_frame)
 scan_button.pack(side="left")
 result_text.pack(side="left")
+progress_bar.pack(side="left")
 
 # add all the frames to the main window
 host_frame.pack()
